@@ -1,0 +1,66 @@
+players : public (DynArray [address, 100])
+losers : public (DynArray [address, 1000])
+odds : public (uint256)
+playersTurn : public (uint256)
+creator : public (address)
+
+@external
+def __init__(contractCreator: address):
+    self.creator = contractCreator
+    self.playersTurn = 0
+
+@internal
+def setOdds (oneInThisMany : uint256):
+    assert (msg.sender == self.creator)
+    self.odds = oneInThisMany
+
+@external
+def addPlayer (player : address):
+    for l in self.losers:
+        assert (l != player)
+    for p in self.players:
+        assert (p != player)
+    self.players.append (player)
+
+
+@internal
+def lose (player : address):
+    self.players = []
+    self.losers.append (player)
+
+@internal
+def random() -> uint256:
+    assert (self.odds >= 1)
+    if block.number % 15 <= self.odds:
+        return block.number % 15 +1
+    elif block.number % 1234 <= self.odds:
+        return block.number % 1234 + 1
+    elif block.number % 189425 <= self.odds:
+        return block.number % 189425
+    elif block.number % 234 <= self.odds:
+        return block.number % 234 + 1
+    elif block.number % 3243245 <= self.odds:
+        return block.number % 3243245 + 1
+    elif block.number % 54 <= self.odds:
+        return block.number % 54 + 1
+    elif block.number % 2 <= self.odds:
+        return block.number % 2 + 1
+    else:
+        return 1
+
+@external
+def play():
+    ran : uint256 = self.random()
+    currPlayer : address = self.players[self.playersTurn]
+    if ran == 1:
+        self.lose (currPlayer)
+    newTurn : uint256 = self.playersTurn + 1
+    self.playersTurn = newTurn
+
+@external
+def isALoser (player : address) -> bool:
+    
+    for x in self.losers:
+        if x == player:
+            return True
+    return False
